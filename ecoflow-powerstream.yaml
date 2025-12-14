@@ -1,0 +1,39 @@
+esphome:
+  name: ecoflow-powerstream
+
+wifi:
+  ssid: "YourWiFiNetwork"
+  password: "YourWiFiPassword"
+
+api:
+  encryption:
+    key: "GQzyyMR03bo9zEl9illf8iLTc22SDeeUUSKr/Hk/gTA="
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/deltamelter/esphome-EcoFlow-PS-LFP-Bridge
+      ref: main
+    components: [ef_ps]
+
+canbus:
+  - platform: esp32_can
+    id: ecoflow_can
+    can_id: 0x351
+    tx_pin: GPIO5
+    rx_pin: GPIO4
+    bit_rate: 500kbps
+
+ef_ps:
+  id: ef_ps_bridge
+  canbus_id: ecoflow_can
+  update_interval: 1s
+
+logger:
+  level: DEBUG
+
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino

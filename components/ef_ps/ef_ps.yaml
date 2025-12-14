@@ -1,0 +1,17 @@
+# Example configuration for the ef_ps component
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ef_ps]
+
+# Example usage in your device YAML
+# ef_ps:
+#   id: ef_ps_bridge
+#   update_interval: 1s
+#
+# sensors:
+#   - platform: ef_ps
+#     name: "Battery Voltage"
+#     unit_of_measurement: "V"
