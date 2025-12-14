@@ -27,6 +27,8 @@ This repository contains an ESPHome external component that implements an EcoFlo
 
 Example using git source (recommended):
 
+**WeAct (ESP32-C3) example:** see `examples/ecoflow-weact.yaml` for a WeAct-specific minimal example. The example uses `GPIO5`/`GPIO4` as suggested defaults for `tx_pin`/`rx_pin`; replace `board` with your WeAct board/variant and change pins if needed.
+
 ```yaml
 external_components:
   - source:

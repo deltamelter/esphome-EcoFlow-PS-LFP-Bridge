@@ -40,6 +40,24 @@ LilyGO T-CAN485 (T-CAN) common pin mapping
   - `GPIO4`  - CAN RX
 - Consult the specific board documentation for exact pins and solder pads.
 
+WeAct ESP32-C3 (WeActStudio/WeActStudio.ESP32C3CoreBoard)
+
+- Recommended: use non-strapping GPIOs where possible. The example YAML provided (`examples/ecoflow-weact.yaml`) uses `GPIO5` (TX) and `GPIO4` (RX) as suggested defaults — **please verify pins on your board and change them if needed**.
+- The WeAct board uses the ESP32-C3; CAN pins are assigned via the GPIO matrix so you can choose different pins if required. Avoid using strapping pins for CAN TX if possible.
+
+CAN transceiver (reference image)
+
+- The transceiver used for the wiring diagram looks like a standard 3.3V CAN transceiver with pins: `VCC`, `GND`, `TX`, `RX`, `CANH`, `CANL`.
+- Typical wiring to the WeAct board/transceiver:
+  - `VCC` -> 3.3V
+  - `GND` -> GND
+  - `TX`  -> selected ESP32 GPIO (example: GPIO5)
+  - `RX`  -> selected ESP32 GPIO (example: GPIO4)
+  - `CANH` -> XT150 Pin 3
+  - `CANL` -> XT150 Pin 4
+
+For visual reference, here's the transceiver image used: https://abacasstorageaccnt.blob.core.windows.net/cirkit/13f01732-48be-4b24-91df-d9bbee1d8aa2.png
+
 Safety & Troubleshooting
 
 - Double-check pin mapping before powering the system.

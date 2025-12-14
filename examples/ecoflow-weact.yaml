@@ -1,0 +1,50 @@
+esphome:
+  name: ecoflow-weact
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+  # Replace `board` with your exact WeAct board/variant (e.g. weact_esp32c3_core_board or a variant) when building for real hardware
+
+wifi:
+  ssid: "your-wifi"
+  password: "your-password"
+
+logger:
+  baud_rate: 0
+
+# Use local `components/` during development
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [ef_ps]
+
+# Suggested pins for WeAct ESP32-C3; verify on your board and change if needed
+canbus:
+  - platform: esp32_can
+    id: ecoflow_can
+    can_id: 0x351
+    tx_pin: GPIO5   # change if needed for your board
+    rx_pin: GPIO4   # change if needed for your board
+    bit_rate: 500kbps
+
+ef_ps:
+  id: ecoflow_bridge
+  canbus_id: ecoflow_can
+  update_interval: 1s
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          extern ::EcoflowConfig config;
+          config.volt = 5120; // 51.20V
+          config.soc = 75;
+          config.temp = 25;
+          config.canTxEnabled = true;
+          ESP_LOGI("ef_weact", "Test values set: V=%d SOC=%d T=%d", config.volt, config.soc, config.temp);
+
+# Optional: a minimal API block for local use (leave blank to avoid requiring encryption)
+api: {}
