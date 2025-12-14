@@ -35,7 +35,7 @@
   <text x="790" y="104" class="text label" text-anchor="middle">XT150</text>
   <text x="760" y="128" class="text">Pin 3: CANH</text>
   <text x="760" y="148" class="text">Pin 4: CANL</text>
-  <text x="760" y="168" class="text">Pins 5&6: BAT ENABLE (SHORT)</text>
+  <text x="760" y="168" class="text">Pins 5&amp;6: BAT ENABLE (SHORT)</text>
 
   <!-- Connections -->
   <line x1="110" y1="126" x2="360" y2="126" class="wire" /> <!-- TX -->

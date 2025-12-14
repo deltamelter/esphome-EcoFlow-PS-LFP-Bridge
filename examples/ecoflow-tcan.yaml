@@ -1,0 +1,51 @@
+esphome:
+  name: ecoflow-tcan
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: "your-wifi"
+  password: "your-password"
+
+logger:
+  baud_rate: 0
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [ef_ps]
+
+# LilyGO T-CAN485 example pins (verify your board variant)
+canbus:
+  - platform: esp32_can
+    id: ecoflow_can
+    can_id: 0x351
+    tx_pin: GPIO5
+    rx_pin: GPIO4
+    bit_rate: 500kbps
+
+# Some T-CAN boards require additional control pins (example only)
+# - enable_pin: GPIO16
+# - mode_pin: GPIO23
+
+ef_ps:
+  id: ecoflow_bridge
+  canbus_id: ecoflow_can
+  update_interval: 1s
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          extern ::EcoflowConfig config;
+          config.volt = 5120;
+          config.soc = 80;
+          config.temp = 25;
+          config.canTxEnabled = true;
+          ESP_LOGI("ef_tcan", "Test values: V=%d SOC=%d", config.volt, config.soc);
+
+api: {}
