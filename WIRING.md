@@ -58,6 +58,11 @@ CAN transceiver (reference image)
 
 For visual reference, here's the transceiver image used: https://abacasstorageaccnt.blob.core.windows.net/cirkit/13f01732-48be-4b24-91df-d9bbee1d8aa2.png
 
+Visual wiring diagram:
+
+![WeAct wiring diagram](docs/weact-wiring.svg)
+
+
 Safety & Troubleshooting
 
 - Double-check pin mapping before powering the system.
