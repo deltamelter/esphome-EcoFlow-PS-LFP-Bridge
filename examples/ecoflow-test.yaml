@@ -1,0 +1,56 @@
+esphome:
+  name: ecoflow-test
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: "your-wifi"
+  password: "your-password"
+
+logger:
+  baud_rate: 0
+
+# Use local `components/` during development
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [ef_ps]
+
+canbus:
+  - platform: esp32_can
+    id: ecoflow_can
+    can_id: 0x351
+    tx_pin: GPIO5
+    rx_pin: GPIO4
+    bit_rate: 500kbps
+
+ef_ps:
+  id: ecoflow_bridge
+  canbus_id: ecoflow_can
+  update_interval: 1s
+
+# simple interval to set sane test values using the global config object
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          // Declare the external global config from the component
+          extern ::EcoflowConfig config;
+          // Set example values (units follow the component's expectations)
+          config.volt = 5120; // 51.20V
+          config.soc = 75;    // 75%
+          config.temp = 25;   // 25°C
+          config.canTxEnabled = true;
+          ESP_LOGI("ef_test", "Test values set: V=%d SOC=%d T=%d", config.volt, config.soc, config.temp);
+
+# Optional web server to view logs and change values interactively
+web_server:
+  port: 80
+
+api: {}
+
+
