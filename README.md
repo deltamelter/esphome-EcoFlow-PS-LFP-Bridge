@@ -18,6 +18,7 @@ This repository contains an ESPHome external component that implements an EcoFlo
   - `can.h` — Minimal CAN helper types used locally
   - `stubs.cpp` — Local stub implementations so `esphome config` can validate without full dependencies
 - **Examples:** `ecoflow-powerstream.yaml` and `examples/ecoflow-test.yaml` — Example top-level configs used for validation and quick testing
+- **Wiring notes:** `WIRING.md` — Wiring diagrams and safety tips
 - **Secrets for local testing:** `secrets.yaml` (not committed with real secrets)
 
 **Usage**
