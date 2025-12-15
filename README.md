@@ -66,6 +66,7 @@ Development notes
 Testing and validation
 - Use `esphome config <your-yaml>` to validate schema and local components.
 - `esphome logs <your-yaml>` is useful to observe CAN frames and the EcoFlow message logs.
+- CI: This repository includes a GitHub Actions workflow that validates example YAMLs and renders wiring SVGs to PNG thumbnails (uploaded as build artifacts).
 
 Contributing
 - Add issues/PRs for bugs or improvements. If you add real BMS integrations, replace the stubs and include tests or example YAML.

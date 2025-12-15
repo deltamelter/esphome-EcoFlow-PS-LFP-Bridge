@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-render:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example: ["examples/ecoflow-test.yaml", "examples/ecoflow-weact.yaml", "examples/ecoflow-tcan.yaml", "ecoflow-powerstream.yaml"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install esphome cairosvg
+
+      - name: Validate config: ${{ matrix.example }}
+        run: esphome config "${{ matrix.example }}"
+
+      - name: Render wiring SVGs to PNG
+        run: |
+          mkdir -p docs/tmp
+          for svg in docs/*.svg; do
+            png=docs/$(basename "$svg" .svg).png
+            python - <<PY
+import cairosvg, sys
+cairosvg.svg2png(url='$svg', write_to='$png', output_width=1200)
+print('rendered', '$png')
+PY
+          done
+
+      - name: Upload wiring thumbnails
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiring-thumbnails
+          path: docs/*.png
