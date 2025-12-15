@@ -37,14 +37,14 @@ external_components:
       ref: main
     components: [ef_ps]
 
-# PowerStream expects 1Mbps CAN. If your board supports it set `bit_rate: 1Mbps`.
+# PowerStream expects 1Mbps CAN. Use the `1000kbps` token in YAML to request 1Mbps.
 canbus:
   - platform: esp32_can
     id: ecoflow_can
     tx_pin: GPIO5
     rx_pin: GPIO4
-    bit_rate: 1Mbps
-# Note: many ESP32 boards/ESPHome drivers do not support 1Mbps — use `500kbps` for compatibility where necessary.
+    bit_rate: 1000kbps
+# Note: some ESP32 boards/drivers may not operate reliably at 1Mbps — if you encounter issues, use `500kbps` for compatibility.
 
 ef_ps:
   id: ecoflow_bridge
@@ -69,6 +69,18 @@ Testing and validation
 - Use `esphome config <your-yaml>` to validate schema and local components.
 - `esphome logs <your-yaml>` is useful to observe CAN frames and the EcoFlow message logs.
 - CI: This repository includes a GitHub Actions workflow that validates example YAMLs and renders wiring SVGs to PNG thumbnails (uploaded as build artifacts).
+
+Troubleshooting CAN bit-rate (1Mbps / 1000kbps)
+- PowerStream expects a 1Mbps CAN bus. In YAML use the token `1000kbps` to request 1Mbps.
+- Validation vs runtime: `esphome config` validates the token but the actual runtime driver and board variant must support 1Mbps. If `esphome config` rejects the value it will show an error like "Bit rate 1000KBPS is not supported on VARIANT".
+- Common remedies:
+  - Try building with the `esp-idf` framework in your YAML (`esp32: framework: type: esp-idf`) — some drivers have better 1Mbps support under ESP-IDF.
+  - Use a different board variant that exposes TWAI support for 1Mbps.
+  - If you cannot get 1Mbps working, test with `500kbps` for functional validation and debugging, but note PowerStream may require 1Mbps for production use.
+- Quick checks:
+  - Run `esphome config <your-yaml>` (validates token and driver compatibility).
+  - If `esphome config` passes but CAN fails at runtime, try switching to ESP-IDF and re-flashing.
+  - See the ESPHome `esp32_can` component source for which tokens are accepted per variant (e.g. `1000KBPS`).
 
 Contributing
 - Add issues/PRs for bugs or improvements. If you add real BMS integrations, replace the stubs and include tests or example YAML.
