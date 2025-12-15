@@ -54,9 +54,11 @@ CAN transceiver (reference image)
 
 For visual reference, here's the transceiver image used: https://abacasstorageaccnt.blob.core.windows.net/cirkit/13f01732-48be-4b24-91df-d9bbee1d8aa2.png
 
-Visual wiring diagram:
+Visual wiring diagram (annotated):
 
-![WeAct wiring diagram](docs/weact-wiring.svg)
+![WeAct wiring diagram (annotated)](docs/weact-wiring-annotated.png)
+
+If you prefer the vector original, see `docs/weact-wiring.svg`.
 
 
 Safety & Troubleshooting
@@ -65,5 +67,3 @@ Safety & Troubleshooting
 - Verify CAN bit-rate (PowerStream expects 1Mbps). Note: many ESP32 boards and the default ESPHome CAN implementation do not support 1Mbps; if your hardware does not support it, use `bit_rate: 500kbps` for testing and validation. See examples for board-specific guidance.
 - If PowerStream reports "Abnormal Voltage", ensure pins 5 & 6 are shorted and voltage range is within expected limits (40–58V).
 - Use an isolated CAN analyzer or oscilloscope to debug CAN timing and voltage levels if you have a bus error.
-
-If you'd like, I can add a small wiring SVG placed in `docs/` (generated programmatically) or include board-specific photos—tell me which board(s) you want illustrated and I will add them.
