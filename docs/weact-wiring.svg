@@ -38,13 +38,40 @@
   <text x="760" y="168" class="text">Pins 5&amp;6: BAT ENABLE (SHORT)</text>
 
   <!-- Connections -->
-  <line x1="110" y1="126" x2="360" y2="126" class="wire" /> <!-- TX -->
-  <line x1="110" y1="146" x2="360" y2="146" class="thin" stroke-dasharray="4 3" /> <!-- RX -->
-  <line x1="95" y1="156" x2="440" y2="96" class="thin" /> <!-- 3.3V -->
-  <line x1="95" y1="176" x2="440" y2="112" class="gnd" /> <!-- GND -->
+  <!-- Highlighted signal markers on board -->
+  <circle cx="50" cy="116" r="6" fill="#d00" stroke="#700" stroke-width="1"/>
+  <text x="64" y="120" class="text">TX (GPIO5)</text>
 
+  <circle cx="50" cy="136" r="6" fill="#06c" stroke="#036" stroke-width="1"/>
+  <text x="64" y="140" class="text">RX (GPIO4)</text>
+
+  <circle cx="50" cy="156" r="6" fill="#0a0" stroke="#050" stroke-width="1"/>
+  <text x="64" y="160" class="text">3.3V</text>
+
+  <circle cx="50" cy="176" r="6" fill="#000" stroke="#333" stroke-width="1"/>
+  <text x="64" y="180" class="text">GND</text>
+
+  <!-- Highlighted connections to transceiver -->
+  <line x1="56" y1="116" x2="360" y2="126" stroke="#d00" stroke-width="3" stroke-linecap="round" /> <!-- TX -->
+  <line x1="56" y1="136" x2="360" y2="146" stroke="#06c" stroke-width="3" stroke-linecap="round" /> <!-- RX -->
+  <line x1="56" y1="156" x2="440" y2="96" stroke="#0a0" stroke-width="3" stroke-linecap="round" /> <!-- 3.3V -->
+  <line x1="56" y1="176" x2="440" y2="112" stroke="#000" stroke-width="3" stroke-linecap="round" /> <!-- GND -->
+
+  <!-- faded original lines for context (CANH/CANL) -->
   <line x1="580" y1="164" x2="720" y2="128" class="thin" /> <!-- CANH -->
   <line x1="580" y1="182" x2="720" y2="148" class="thin" /> <!-- CANL -->
+
+  <!-- Legend -->
+  <rect x="320" y="230" width="220" height="100" rx="6" class="chip" />
+  <text x="340" y="250" class="text label">Legend</text>
+  <circle cx="340" cy="270" r="6" fill="#d00" stroke="#700" stroke-width="1"/>
+  <text x="356" y="274" class="text">TX (ESP TX)</text>
+  <circle cx="340" cy="292" r="6" fill="#06c" stroke="#036" stroke-width="1"/>
+  <text x="356" y="296" class="text">RX (ESP RX)</text>
+  <circle cx="340" cy="314" r="6" fill="#0a0" stroke="#050" stroke-width="1"/>
+  <text x="356" y="318" class="text">3.3V</text>
+  <circle cx="340" cy="336" r="6" fill="#000" stroke="#333" stroke-width="1"/>
+  <text x="356" y="340" class="text">GND</text>
 
   <!-- Icons/notes area -->
   <text x="150" y="250" class="text">Notes:</text>
