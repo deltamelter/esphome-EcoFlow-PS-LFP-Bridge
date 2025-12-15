@@ -35,6 +35,12 @@ Board-specific notes
 - This project targets the ESP32 platform. Use the `esp32:` block in your YAML and set the board variant appropriate for your hardware.
 - Board-specific examples are in the `examples/` folder (WeAct ESP32-C3, LilyGO T-CAN485). See `examples/ecoflow-weact.yaml` and `examples/ecoflow-tcan.yaml`.
 
+WeAct board reference image
+
+![WeAct ESP32-C3 Mini](docs/weact-board.png)
+
+_Image source: Zephyr Project docs_ — https://docs.zephyrproject.org/latest/_images/weact_esp32c3_mini.webp
+
 CAN transceiver (reference image)
 
 - The transceiver used for the wiring diagram looks like a standard 3.3V CAN transceiver with pins: `VCC`, `GND`, `TX`, `RX`, `CANH`, `CANL`.
