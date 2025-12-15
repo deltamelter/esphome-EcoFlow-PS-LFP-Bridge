@@ -56,7 +56,7 @@ Visual wiring diagram:
 Safety & Troubleshooting
 
 - Double-check pin mapping before powering the system.
-- Verify CAN bit-rate (PowerStream expects 500kbps in this project).
+- Verify CAN bit-rate (PowerStream expects 1Mbps). Note: many ESP32 boards and the default ESPHome CAN implementation do not support 1Mbps; if your hardware does not support it, use `bit_rate: 500kbps` for testing and validation. See examples for board-specific guidance.
 - If PowerStream reports "Abnormal Voltage", ensure pins 5 & 6 are shorted and voltage range is within expected limits (40–58V).
 - Use an isolated CAN analyzer or oscilloscope to debug CAN timing and voltage levels if you have a bus error.
 

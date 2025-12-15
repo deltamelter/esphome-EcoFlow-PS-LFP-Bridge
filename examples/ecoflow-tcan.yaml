@@ -21,6 +21,8 @@ external_components:
 
 # LilyGO T-CAN485 example pins (verify your board variant)
 canbus:
+  # PowerStream expects 1Mbps CAN. If your hardware supports it, replace with `bit_rate: 1Mbps`.
+  # For validation and many ESP32 boards, use 500kbps for compatibility.
   - platform: esp32_can
     id: ecoflow_can
     can_id: 0x351

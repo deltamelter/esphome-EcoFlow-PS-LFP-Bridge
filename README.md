@@ -37,12 +37,14 @@ external_components:
       ref: main
     components: [ef_ps]
 
+# PowerStream expects 1Mbps CAN. If your board supports it set `bit_rate: 1Mbps`.
 canbus:
   - platform: esp32_can
     id: ecoflow_can
     tx_pin: GPIO5
     rx_pin: GPIO4
-    bit_rate: 500kbps
+    bit_rate: 1Mbps
+# Note: many ESP32 boards/ESPHome drivers do not support 1Mbps — use `500kbps` for compatibility where necessary.
 
 ef_ps:
   id: ecoflow_bridge

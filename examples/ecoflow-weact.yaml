@@ -23,6 +23,8 @@ external_components:
 
 # Suggested pins for WeAct ESP32-C3; verify on your board and change if needed
 canbus:
+  # PowerStream expects 1Mbps CAN. If your hardware supports it, replace with `bit_rate: 1Mbps`.
+  # For validation and many ESP32 boards, use 500kbps for compatibility.
   - platform: esp32_can
     id: ecoflow_can
     can_id: 0x351
