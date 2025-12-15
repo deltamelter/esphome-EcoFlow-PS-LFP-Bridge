@@ -2,8 +2,9 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <Arduino.h>
+#include <string>
 #include "can.h"
+// No direct Arduino dependency — use ESPHome/standard headers only
 
 // Minimal config struct used by the messages (only fields referenced here)
 struct EcoflowConfig {
@@ -50,12 +51,14 @@ extern volatile uint32_t can_decoded;
 
 extern float inputWatt;
 extern float outputWatt;
-extern String canLog;
+extern std::string canLog;
+
+// (millis() is used within the implementation; use platform-appropriate helpers there)
 
 // Functions provided by this module
 void ecoflowMessagesInit();
 void sendCANMessage(uint8_t* header, uint8_t* payload, size_t headerSize, size_t payloadSize);
-void processEcoFlowCAN(const twai_message_t &rx);
+void processEcoFlowCAN(const ef_twai_message_t &rx);
 void canTxSequencerTick();
 void canSequencer_onHeartbeatC4();
 

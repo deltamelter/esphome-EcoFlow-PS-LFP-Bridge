@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: ["examples/ecoflow-test.yaml", "examples/ecoflow-weact.yaml", "examples/ecoflow-tcan.yaml", "ecoflow-powerstream.yaml"]
+        example: ["examples/ecoflow-test.yaml", "examples/ecoflow-weact.yaml", "examples/ecoflow-tcan.yaml", "examples/ecoflow-espidf.yaml", "ecoflow-powerstream.yaml"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,6 +28,9 @@ jobs:
 
       - name: Validate config: ${{ matrix.example }}
         run: esphome config "${{ matrix.example }}"
+
+      - name: Compile example: ${{ matrix.example }}
+        run: esphome compile "${{ matrix.example }}"
 
       - name: Render wiring SVGs to PNG
         run: |
