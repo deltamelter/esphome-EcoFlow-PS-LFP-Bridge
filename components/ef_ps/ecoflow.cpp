@@ -1,7 +1,16 @@
 #include "ecoflow.h"
-#include "web.h"
 #include "can.h"   // must provide sendCANFrame()
 #include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <chrono>
+#if defined(ESP32) || defined(ESP8266)
+#include <esp_timer.h>
+#define EF_MILLIS() ((unsigned long)(esp_timer_get_time() / 1000ULL))
+#else
+#define EF_MILLIS() ((unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count())
+#endif
+#include <cstdio>
 
 //EcoFlow PowerStream serial (from C4), 16 chars + null
 static char SerialPS[17] = {0};
@@ -16,7 +25,7 @@ volatile uint32_t can_decoded = 0;
 
 float inputWatt = 0.0f;
 float outputWatt = 0.0f;
-String canLog = "";
+std::string canLog = "";
 
 // ================= XOR state =================
 uint8_t xor3C; // Save C4 XOR
@@ -635,7 +644,7 @@ void ecoflowSendCB2033() {
 // ================= CRC helper =================
 
 uint16_t crc16(const uint8_t *data, uint16_t len) {
-  static const uint16_t table[] PROGMEM = {
+  static const uint16_t table[] = {
       0, 49345, 49537, 320, 49921, 960, 640, 49729,
       50689, 1728, 1920, 51009, 1280, 50625, 50305, 1088,
       52225, 3264, 3456, 52545, 3840, 53185, 52865, 3648,
@@ -670,7 +679,7 @@ uint16_t crc16(const uint8_t *data, uint16_t len) {
       33281, 17088, 17280, 33601, 16640, 33217, 32897, 16448};
   uint16_t crc = 0;
   for (uint16_t i = 0; i < len; i++) {
-    crc = pgm_read_word_near(table + ((crc ^ data[i]) & 0xFF)) ^ (crc >> 8);
+    crc = table[((crc ^ data[i]) & 0xFF)] ^ (crc >> 8);
   }
   return crc;
 }
@@ -750,14 +759,18 @@ void sendCANMessage(uint8_t* header, uint8_t* payload, size_t headerSize, size_t
       uint32_t id   = (frame_idx == 0) ? id_first : (is_last ? id_last : id_middle);
 
       sendCANFrame(id, &final_msg[pos], chunk);
-if (config.txlogging) {
-      canLog += "TX 0x" + String(id, HEX) + ": ";
-      for (uint8_t j = 0; j < chunk; j++) {
-        if (final_msg[pos + j] < 0x10) canLog += "0";
-        canLog += String(final_msg[pos + j], HEX) + (j + 1 < chunk ? " " : "");
+      if (config.txlogging) {
+        char buf[64];
+        int n = snprintf(buf, sizeof(buf), "TX 0x%lX: ", (unsigned long)id);
+        canLog.append(buf, (n > 0) ? n : 0);
+        for (uint8_t j = 0; j < chunk; j++) {
+          if (final_msg[pos + j] < 0x10) canLog.push_back('0');
+          int m = snprintf(buf, sizeof(buf), "%02X", final_msg[pos + j]);
+          canLog.append(buf, (m > 0) ? m : 0);
+          if (j + 1 < chunk) canLog.push_back(' ');
+        }
+        canLog += "<br>";
       }
-      canLog += "<br>";
-    }
       pos += chunk;
 
     } else {
@@ -773,11 +786,15 @@ if (config.txlogging) {
       uint32_t id   = (frame_idx == 0) ? id_first : (is_last ? id_last : id_middle);
 
       sendCANFrame(id, frame_bytes, (uint8_t)(chunk + 1));
-if (config.txlogging) {
-      canLog += "TX 0x" + String(id, HEX) + ": ";
+    if (config.txlogging) {
+      char buf[64];
+      int n = snprintf(buf, sizeof(buf), "TX 0x%lX: ", (unsigned long)id);
+      canLog.append(buf, (n > 0) ? n : 0);
       for (uint8_t j = 0; j < (uint8_t)(chunk + 1); j++) {
-        if (frame_bytes[j] < 0x10) canLog += "0";
-        canLog += String(frame_bytes[j], HEX) + (j + 1 < (uint8_t)(chunk + 1) ? " " : "");
+        if (frame_bytes[j] < 0x10) canLog.push_back('0');
+        int m = snprintf(buf, sizeof(buf), "%02X", frame_bytes[j]);
+        canLog.append(buf, (m > 0) ? m : 0);
+        if (j + 1 < (uint8_t)(chunk + 1)) canLog.push_back(' ');
       }
       canLog += "<br>";
     }
@@ -786,31 +803,31 @@ if (config.txlogging) {
 
     frame_idx++;
     // vTaskDelay(1);   // remove this hard delay
-if (frame_idx & 0x3) taskYIELD(); // tiny cooperative yield every 4 frames
+    // tiny cooperative yield every 4 frames (platform-specific); noop here
   }
 }
 
 // ================= Sequencer =================
 
 void canSequencer_onHeartbeatC4() {
-  g_lastC4ms = millis();
+  g_lastC4ms = EF_MILLIS();
   if (!g_seqRunning) {
     g_seqRunning = true;
     g_seqIndex   = 0;
-    g_nextDueMs  = millis();   // start immediately
+    g_nextDueMs  = EF_MILLIS();   // start immediately
     canHealth = true;
   }
 }
 
 void canTxSequencerTick() {
   // stop if heartbeat lost
-  if (g_seqRunning && (millis() - g_lastC4ms > C4_LOSS_TIMEOUT_MS)) {
+  if (g_seqRunning && (EF_MILLIS() - g_lastC4ms > C4_LOSS_TIMEOUT_MS)) {
     g_seqRunning = false;
     canHealth = false;
   }
   if (!g_seqRunning || !config.canTxEnabled) return;
 
-  uint32_t now = millis();
+  uint32_t now = EF_MILLIS();
   if (now < g_nextDueMs) return;
 
   // send current step
@@ -920,12 +937,12 @@ static void sendAction(TxAction a) {
 // ================= Xor Counter Initialiser =================
 
 void ecoflowMessagesInit() {
-  xorCounter = (uint8_t)random(0, 256);
+  xorCounter = (uint8_t)(rand() & 0xFF);
 }
 
 // ================= EcoFlow CAN Rx Processor =================
 
-void processEcoFlowCAN(const twai_message_t &rx) {
+void processEcoFlowCAN(const ef_twai_message_t &rx) {
   uint32_t id = rx.identifier;
   uint32_t fullID = id & 0x1FFFFFFF;
 
@@ -979,7 +996,7 @@ void processEcoFlowCAN(const twai_message_t &rx) {
     if (have + dlc > MSG14001_BUF_CAP) dlc = (uint8_t)(MSG14001_BUF_CAP - have); // clamp
     memcpy(&buf[have], data, dlc);
     have += dlc;
-    lastTime = millis();
+    lastTime = EF_MILLIS();
 
     // Capture type early
     if (!curTypeValid && have >= (IDX_TYPE + 1)) {
@@ -1143,7 +1160,7 @@ void processEcoFlowCAN(const twai_message_t &rx) {
 
   // ----- route incoming frame -----
   if (fullID == MSG14001_START_ID) {
-    reset_state(); active = true; lastTime = millis();
+    reset_state(); active = true; lastTime = EF_MILLIS();
     append_bytes(rx.data, rx.data_length_code);
     streamDebug("14001 start");
   } else if (fullID == MSG14001_MID_ID) {
@@ -1154,7 +1171,7 @@ void processEcoFlowCAN(const twai_message_t &rx) {
   }
 
   // ----- timeout -----
-  if (active && (millis() - lastTime > MSG14001_TIMEOUT_MS)) {
+  if (active && (EF_MILLIS() - lastTime > MSG14001_TIMEOUT_MS)) {
     streamDebug("14001 timeout — reset");
     reset_state();
   }
