@@ -3,13 +3,15 @@ import esphome.config_validation as cv
 from esphome.components import canbus
 from esphome.const import CONF_ID, CONF_UPDATE_INTERVAL
 
+# Add this line to properly reference the CanbusListener class
+CANBUS_LISTENER_CLASS = canbus.canbus_ns.class_("CanbusListener")
+
 DEPENDENCIES = ["canbus"]
 AUTO_LOAD = ["canbus"]
 
-# Define the namespace and class name
-# These must match exactly what sensor.py imports and what is in ef_ps.h
 ef_ps_ns = cg.esphome_ns.namespace("ef_ps")
-EfPs = ef_ps_ns.class_("EfPs", cg.PollingComponent, cg.canbus.CanbusListener)
+# Use cg.PollingComponent and our new CANBUS_LISTENER_CLASS
+EfPs = ef_ps_ns.class_("EfPs", cg.PollingComponent, CANBUS_LISTENER_CLASS)
 
 CONF_CANBUS_ID = "canbus_id"
 
@@ -26,6 +28,5 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     can = await cg.get_variable(config[CONF_CANBUS_ID])
-    cg.add(var.set_canbus_id(can)) # Matches the 'set_canbus_id' in our new ef_ps.h
-
-    # We use PollingComponent, so update_interval is handled automatically by register_component
+    # Ensure this matches the method name in your ef_ps.h
+    cg.add(var.set_canbus_id(can))
