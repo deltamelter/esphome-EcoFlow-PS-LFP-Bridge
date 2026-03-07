@@ -1,72 +1,51 @@
 #include "ef_ps.h"
 #include "esphome/core/log.h"
 
-extern "C" {
-	#include <string.h>
-}
-
-// ===== include your original headers =====
-#include "ecoflow.h"
-#include "can.h"
-
+namespace esphome {
 namespace ef_ps {
 
-static const char *TAG = "ef_ps";
+static const char *const TAG = "ef_ps";
 
-// Bridge ESPHome → your sendCANFrame()
-void sendCANFrame(uint32_t id, const uint8_t *data, uint8_t len) {
-    auto *bus = EfPsComponent::instance;
-    if (!bus) return;
-
-    std::vector<uint8_t> payload(data, data + len);
-    bus->send_data(id, payload);
+void EfPs::setup() {
+  // Register this class as a listener for CAN frames
+  this->canbus_->add_listener(this);
+  ESP_LOGCONFIG(TAG, "Setting up EcoFlow PS Bridge...");
 }
 
-// ===== singleton pointer =====
-EfPsComponent *EfPsComponent::instance = nullptr;
-
-void EfPsComponent::setup() {
-	ESP_LOGI(TAG, "Setting up EcoFlow PS CAN LFP Bridge");
-
-	instance = this;
-
-	ecoflowMessagesInit();
-
-	this->canbus_->add_callback(
-		[](uint32_t can_id, bool extended_id, bool rtr, const std::vector<uint8_t> &data) {
-			(void)rtr;
-			ef_twai_message_t rx{};
-			rx.identifier = can_id;
-			rx.extd = extended_id;
-			rx.data_length_code = (uint8_t)std::min<size_t>(data.size(), 8);
-			memcpy(rx.data, data.data(), rx.data_length_code);
-
-			processEcoFlowCAN(rx);
-		}
-	);
+void EfPs::update() {
+  // This is called every 'update_interval'
+  this->send_can_heartbeat();
+  this->send_can_battery_info();
 }
 
-void EfPsComponent::loop() {
-	canTxSequencerTick();
+void EfPs::on_frame(const canbus::CanFrame &frame) {
+  // Logic for handling incoming frames from PowerStream
+  // You can implement specific logic here if the PS sends requests
 }
 
-void EfPsComponent::update() {
-    canTxSequencerTick();
+void EfPs::send_can_heartbeat() {
+    if (!this->canbus_) return;
+    // Example heartbeat ID - adjust based on specific PowerStream protocol requirements
+    std::vector<uint8_t> data = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}; 
+    this->canbus_->send_data(0x2FF, true, data); 
 }
 
-void EfPsComponent::send_data(uint32_t id, const std::vector<uint8_t> &payload) {
-	if (!this->canbus_) return;
-	this->canbus_->send_data(id, /*use_extended_id=*/true, payload);
+void EfPs::send_can_battery_info() {
+    if (!this->canbus_) return;
+
+    // This is where you package your battery_soc_ and battery_voltage_ 
+    // into the specific EcoFlow CAN format.
+    
+    // Example (Simplified):
+    // uint16_t v = (uint16_t)(this->battery_voltage_ * 100);
+    // std::vector<uint8_t> data = { (uint8_t)this->battery_soc_, ... };
+    // this->canbus_->send_data(0x??? , true, data);
 }
 
-void EfPsComponent::dump_config() {
-	ESP_LOGCONFIG(TAG, "EcoFlow PS CAN LFP Bridge");
+void EfPs::dump_config() {
+    ESP_LOGCONFIG(TAG, "EcoFlow PS Bridge:");
+    LOG_UPDATE_INTERVAL(this);
 }
 
 }  // namespace ef_ps
-
-// Provide a global wrapper so legacy unqualified calls from `ecoflow.cpp`
-// resolve to the namespaced implementation.
-void sendCANFrame(uint32_t id, const uint8_t *data, uint8_t len) {
-	ef_ps::sendCANFrame(id, data, len);
-}
+}  // namespace esphome
