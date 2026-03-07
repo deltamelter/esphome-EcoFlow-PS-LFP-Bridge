@@ -18,17 +18,15 @@ void EfPs::dump_config() {
 }
 
 void EfPs::update() {
-  // PowerStream Battery Info Frame (Example ID: 0x621)
-  // You must fill the hex data based on the EcoFlow protocol specs
-  std::vector<uint8_t> data(8, 0); 
-  data[0] = (uint8_t)this->battery_soc_;
-  // ... more packing logic ...
-  
-  this->send_can_data(0x621, data);
+  if (this->canbus_ == nullptr) return;
+
+  // PowerStream Heartbeat/Data logic goes here
+  // Example: std::vector<uint8_t> data = { (uint8_t)this->battery_soc_, ... };
+  // this->canbus_->send_data(0x621, true, data);
 }
 
 void EfPs::on_frame(const canbus::CanFrame &frame) {
-  // Optional: Listen for PowerStream requests
+  // Handle frames received from PowerStream
 }
 
 void EfPs::set_battery_soc(float val) {
@@ -44,12 +42,6 @@ void EfPs::set_battery_voltage(float val) {
 void EfPs::set_battery_current(float val) {
   this->battery_current_ = val;
   if (this->battery_current_sensor_ != nullptr) this->battery_current_sensor_->publish_state(val);
-}
-
-void EfPs::send_can_data(uint32_t id, const std::vector<uint8_t> &data) {
-  if (this->canbus_ != nullptr) {
-    this->canbus_->send_data(id, true, data);
-  }
 }
 
 }  // namespace ef_ps
