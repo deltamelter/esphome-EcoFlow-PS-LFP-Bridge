@@ -7,44 +7,49 @@ namespace ef_ps {
 static const char *const TAG = "ef_ps";
 
 void EfPs::setup() {
-  // Register this class as a listener for CAN frames
-  this->canbus_->add_listener(this);
-  ESP_LOGCONFIG(TAG, "Setting up EcoFlow PS Bridge...");
-}
-
-void EfPs::update() {
-  // This is called every 'update_interval'
-  this->send_can_heartbeat();
-  this->send_can_battery_info();
-}
-
-void EfPs::on_frame(const canbus::CanFrame &frame) {
-  // Logic for handling incoming frames from PowerStream
-  // You can implement specific logic here if the PS sends requests
-}
-
-void EfPs::send_can_heartbeat() {
-    if (!this->canbus_) return;
-    // Example heartbeat ID - adjust based on specific PowerStream protocol requirements
-    std::vector<uint8_t> data = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}; 
-    this->canbus_->send_data(0x2FF, true, data); 
-}
-
-void EfPs::send_can_battery_info() {
-    if (!this->canbus_) return;
-
-    // This is where you package your battery_soc_ and battery_voltage_ 
-    // into the specific EcoFlow CAN format.
-    
-    // Example (Simplified):
-    // uint16_t v = (uint16_t)(this->battery_voltage_ * 100);
-    // std::vector<uint8_t> data = { (uint8_t)this->battery_soc_, ... };
-    // this->canbus_->send_data(0x??? , true, data);
+  if (this->canbus_ != nullptr) {
+    this->canbus_->add_driver(this);
+  }
 }
 
 void EfPs::dump_config() {
-    ESP_LOGCONFIG(TAG, "EcoFlow PS Bridge:");
-    LOG_UPDATE_INTERVAL(this);
+  ESP_LOGCONFIG(TAG, "EcoFlow PS Bridge:");
+  LOG_UPDATE_INTERVAL(this);
+}
+
+void EfPs::update() {
+  // PowerStream Battery Info Frame (Example ID: 0x621)
+  // You must fill the hex data based on the EcoFlow protocol specs
+  std::vector<uint8_t> data(8, 0); 
+  data[0] = (uint8_t)this->battery_soc_;
+  // ... more packing logic ...
+  
+  this->send_can_data(0x621, data);
+}
+
+void EfPs::on_frame(const canbus::CanFrame &frame) {
+  // Optional: Listen for PowerStream requests
+}
+
+void EfPs::set_battery_soc(float val) {
+  this->battery_soc_ = val;
+  if (this->battery_soc_sensor_ != nullptr) this->battery_soc_sensor_->publish_state(val);
+}
+
+void EfPs::set_battery_voltage(float val) {
+  this->battery_voltage_ = val;
+  if (this->battery_voltage_sensor_ != nullptr) this->battery_voltage_sensor_->publish_state(val);
+}
+
+void EfPs::set_battery_current(float val) {
+  this->battery_current_ = val;
+  if (this->battery_current_sensor_ != nullptr) this->battery_current_sensor_->publish_state(val);
+}
+
+void EfPs::send_can_data(uint32_t id, const std::vector<uint8_t> &data) {
+  if (this->canbus_ != nullptr) {
+    this->canbus_->send_data(id, true, data);
+  }
 }
 
 }  // namespace ef_ps
