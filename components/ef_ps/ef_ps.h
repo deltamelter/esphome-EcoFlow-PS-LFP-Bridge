@@ -21,7 +21,7 @@ class EfPs : public PollingComponent, public canbus::CanbusListener {
   void set_battery_voltage_sensor(sensor::Sensor *s) { battery_voltage_sensor_ = s; }
   void set_battery_current_sensor(sensor::Sensor *s) { battery_current_sensor_ = s; }
 
-  // Data Setters (Lambdas)
+  // Data Setters
   void set_battery_soc(float val);
   void set_battery_voltage(float val);
   void set_battery_current(float val);
@@ -36,8 +36,6 @@ class EfPs : public PollingComponent, public canbus::CanbusListener {
   sensor::Sensor *battery_soc_sensor_{nullptr};
   sensor::Sensor *battery_voltage_sensor_{nullptr};
   sensor::Sensor *battery_current_sensor_{nullptr};
-
-  void send_can_data(uint32_t id, const std::vector<uint8_t> &data);
 };
 
 }  // namespace ef_ps
