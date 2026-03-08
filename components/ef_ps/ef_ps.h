@@ -7,13 +7,13 @@
 namespace esphome {
 namespace ef_ps {
 
-// Use full explicit namespaces for base classes
-class EfPs : public esphome::Component, public esphome::canbus::CanbusListener {
+// Inherit from CanbusTrigger to match the add_trigger() method
+class EfPs : public esphome::Component, public esphome::canbus::CanbusTrigger {
  public:
   void setup() override;
   void dump_config() override;
   
-  // Signature must match esphome::canbus::CanbusListener exactly
+  // CanbusTrigger uses on_frame
   void on_frame(const esphome::canbus::CanFrame &frame) override;
 
   void set_canbus_id(esphome::canbus::Canbus *canbus) { this->canbus_ = canbus; }
