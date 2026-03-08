@@ -8,7 +8,6 @@ AUTO_LOAD = ["canbus", "sensor"]
 
 ef_ps_ns = cg.esphome_ns.namespace("ef_ps")
 CanbusTrigger = canbus.canbus_ns.class_("CanbusTrigger")
-# EfPs remains a Component that acts as a CanbusTrigger
 EfPs = ef_ps_ns.class_("EfPs", cg.Component, CanbusTrigger)
 
 CONF_CANBUS_ID = "canbus_id"
@@ -26,4 +25,5 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     can = await cg.get_variable(config[CONF_CANBUS_ID])
-    cg.add(var.set_canbus_id(can))))
+    # Fixed the unmatched ')' here
+    cg.add(var.set_canbus_id(can))
