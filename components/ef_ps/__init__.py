@@ -8,10 +8,9 @@ AUTO_LOAD = ["canbus", "sensor"]
 
 ef_ps_ns = cg.esphome_ns.namespace("ef_ps")
 
-# FIX: We must use canbus_ns to get the C++ class reference, 
-# not the 'canbus' module directly.
+# FIX: Switch to cg.Component to match the simplified ef_ps.h
 CanbusListener = canbus.canbus_ns.class_("CanbusListener")
-EfPs = ef_ps_ns.class_("EfPs", cg.PollingComponent, CanbusListener)
+EfPs = ef_ps_ns.class_("EfPs", cg.Component, CanbusListener)
 
 CONF_CANBUS_ID = "canbus_id"
 
@@ -28,5 +27,8 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     can = await cg.get_variable(config[CONF_CANBUS_ID])
-    # Ensure this matches your C++ header method name
+    # Matches the method in our simplified ef_ps.h
     cg.add(var.set_canbus_id(can))
+    
+    if CONF_UPDATE_INTERVAL in config:
+        cg.add(var.set_update_interval(config[CONF_UPDATE_INTERVAL]))
