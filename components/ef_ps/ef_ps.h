@@ -7,13 +7,11 @@
 namespace esphome {
 namespace ef_ps {
 
-// Inheriting from CanbusTrigger solves the 'expected class-name' and 'add_trigger' issues
 class EfPs : public Component, public canbus::CanbusTrigger {
  public:
   void setup() override;
+  void loop() override; // We use loop() to handle the heartbeat timing
   void dump_config() override;
-  
-  // Signature for CanbusTrigger
   void on_frame(const canbus::CanFrame &frame) override;
 
   void set_canbus_id(canbus::Canbus *canbus) { this->canbus_ = canbus; }
@@ -26,6 +24,7 @@ class EfPs : public Component, public canbus::CanbusTrigger {
 
  protected:
   canbus::Canbus *canbus_{nullptr};
+  uint32_t last_transmission_{0};
   
   float battery_soc_{0};
   float battery_voltage_{0};
