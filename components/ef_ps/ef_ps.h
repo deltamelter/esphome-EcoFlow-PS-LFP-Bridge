@@ -7,17 +7,18 @@
 namespace esphome {
 namespace ef_ps {
 
-// Explicitly use the full namespaces for the base classes
-class EfPs : public esphome::PollingComponent, public esphome::canbus::CanbusListener {
+// We use Component and CanbusListener. We will handle the "polling" manually
+// to avoid the PollingComponent header resolution issues.
+class EfPs : public Component, public canbus::CanbusListener {
  public:
   void setup() override;
-  void update() override;
   void dump_config() override;
   
-  // This signature must be exact
-  void on_frame(const esphome::canbus::CanFrame &frame) override;
+  // This is the correct signature for the CAN listener
+  void on_frame(const canbus::CanFrame &frame) override;
 
-  void set_canbus_id(esphome::canbus::Canbus *canbus) { this->canbus_ = canbus; }
+  void set_canbus_id(canbus::Canbus *canbus) { this->canbus_ = canbus; }
+  void set_update_interval(uint32_t interval) { this->update_interval_ = interval; }
 
   // Sensor Setters
   void set_battery_soc_sensor(sensor::Sensor *s) { battery_soc_sensor_ = s; }
@@ -30,7 +31,9 @@ class EfPs : public esphome::PollingComponent, public esphome::canbus::CanbusLis
   void set_battery_current(float val);
 
  protected:
-  esphome::canbus::Canbus *canbus_{nullptr};
+  canbus::Canbus *canbus_{nullptr};
+  uint32_t update_interval_{1000};
+  uint32_t last_update_{0};
   
   float battery_soc_{0};
   float battery_voltage_{0};
@@ -39,6 +42,8 @@ class EfPs : public esphome::PollingComponent, public esphome::canbus::CanbusLis
   sensor::Sensor *battery_soc_sensor_{nullptr};
   sensor::Sensor *battery_voltage_sensor_{nullptr};
   sensor::Sensor *battery_current_sensor_{nullptr};
+
+  void send_can_data();
 };
 
 }  // namespace ef_ps
