@@ -7,15 +7,16 @@
 namespace esphome {
 namespace ef_ps {
 
-class EfPs : public Component, public canbus::CanbusListener {
+// Using the absolute global namespace ::esphome to prevent the "expected class-name" error
+class EfPs : public ::esphome::Component, public ::esphome::canbus::CanbusListener {
  public:
   void setup() override;
   void dump_config() override;
   
-  // This is the exact signature required by CanbusListener
-  void on_frame(const canbus::CanFrame &frame) override;
+  // The signature must match the parent class exactly
+  void on_frame(const ::esphome::canbus::CanFrame &frame) override;
 
-  void set_canbus_id(canbus::Canbus *canbus) { this->canbus_ = canbus; }
+  void set_canbus_id(::esphome::canbus::Canbus *canbus) { this->canbus_ = canbus; }
   void set_update_interval(uint32_t interval) { this->update_interval_ = interval; }
 
   void set_battery_soc_sensor(sensor::Sensor *s) { battery_soc_sensor_ = s; }
@@ -25,7 +26,7 @@ class EfPs : public Component, public canbus::CanbusListener {
   void set_battery_voltage(float val);
 
  protected:
-  canbus::Canbus *canbus_{nullptr};
+  ::esphome::canbus::Canbus *canbus_{nullptr};
   uint32_t update_interval_{1000};
   
   float battery_soc_{0};
