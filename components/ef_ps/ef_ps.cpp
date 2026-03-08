@@ -18,7 +18,7 @@ void EfPs::dump_config() {
 
 void EfPs::on_frame(const canbus::CanFrame &frame) {
   // This prints every message from the PowerStream to your ESPHome logs
-  ESP_LOGD("ef_ps_rx", "Received ID: 0x%03X, Data: %02X %02X %02X %02X", 
+  ESP_LOGI("ef_ps_rx", "Received ID: 0x%03X, Data: %02X %02X %02X %02X", 
            frame.can_id, frame.data[0], frame.data[1], frame.data[2], frame.data[3]);
 
   // Example: If PowerStream (0x600) asks for something, respond here
