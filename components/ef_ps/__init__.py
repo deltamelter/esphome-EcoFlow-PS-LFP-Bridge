@@ -8,10 +8,9 @@ AUTO_LOAD = ["canbus", "sensor"]
 
 ef_ps_ns = cg.esphome_ns.namespace("ef_ps")
 
-# We include cg.Component here so register_component doesn't throw a ValueError.
-# In C++, it only inherits from CanbusTrigger (which is a Component).
-CanbusTrigger = canbus.canbus_ns.class_("CanbusTrigger")
-EfPs = ef_ps_ns.class_("EfPs", cg.Component, CanbusTrigger)
+# Match the C++ inheritance
+CanbusListener = canbus.canbus_ns.class_("CanbusListener")
+EfPs = ef_ps_ns.class_("EfPs", cg.Component, CanbusListener)
 
 CONF_CANBUS_ID = "canbus_id"
 
@@ -25,11 +24,7 @@ CONFIG_SCHEMA = cv.Schema(
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    # This now works because Python sees cg.Component above
     await cg.register_component(var, config)
 
     can = await cg.get_variable(config[CONF_CANBUS_ID])
     cg.add(var.set_canbus_id(can))
-    
-    if CONF_UPDATE_INTERVAL in config:
-        cg.add(var.set_update_interval(config[CONF_UPDATE_INTERVAL]))
