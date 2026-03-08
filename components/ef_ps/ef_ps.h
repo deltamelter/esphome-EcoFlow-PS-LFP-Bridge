@@ -7,13 +7,14 @@
 namespace esphome {
 namespace ef_ps {
 
-// Inherit from CanbusTrigger to match the add_trigger() method
-class EfPs : public esphome::Component, public esphome::canbus::CanbusTrigger {
+// Only inherit from CanbusTrigger. It already includes 'Component'.
+class EfPs : public esphome::canbus::CanbusTrigger {
  public:
   void setup() override;
   void dump_config() override;
   
-  // CanbusTrigger uses on_frame
+  // This is the function called when a CAN frame matches (if configured) 
+  // or via the listener logic.
   void on_frame(const esphome::canbus::CanFrame &frame) override;
 
   void set_canbus_id(esphome::canbus::Canbus *canbus) { this->canbus_ = canbus; }
