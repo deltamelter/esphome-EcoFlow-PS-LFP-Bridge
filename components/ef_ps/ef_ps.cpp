@@ -8,8 +8,7 @@ static const char *const TAG = "ef_ps";
 
 void EfPs::setup() {
   if (this->canbus_ != nullptr) {
-    // Fix: Your compiler suggested 'add_trigger' to register the listener
-    this->canbus_->add_trigger(this); 
+    this->canbus_->add_listener(this);
   }
 }
 
@@ -17,8 +16,15 @@ void EfPs::dump_config() {
   ESP_LOGCONFIG(TAG, "EcoFlow PS Bridge");
 }
 
-void EfPs::on_frame(const esphome::canbus::CanFrame &frame) {
-  // Logic for incoming frames if needed
+void EfPs::on_frame(const canbus::CanFrame &frame) {
+  // This prints every message from the PowerStream to your ESPHome logs
+  ESP_LOGD("ef_ps_rx", "Received ID: 0x%03X, Data: %02X %02X %02X %02X", 
+           frame.can_id, frame.data[0], frame.data[1], frame.data[2], frame.data[3]);
+
+  // Example: If PowerStream (0x600) asks for something, respond here
+  if (frame.can_id == 0x600) {
+     this->send_can_data();
+  }
 }
 
 void EfPs::set_battery_soc(float val) {
@@ -32,11 +38,6 @@ void EfPs::set_battery_voltage(float val) {
   if (this->battery_voltage_sensor_ != nullptr) this->battery_voltage_sensor_->publish_state(val);
 }
 
-void EfPs::set_battery_current(float val) {
-  this->battery_current_ = val;
-  if (this->battery_current_sensor_ != nullptr) this->battery_current_sensor_->publish_state(val);
-}
-
 void EfPs::send_can_data() {
   if (this->canbus_ == nullptr) return;
 
@@ -45,10 +46,6 @@ void EfPs::send_can_data() {
   uint16_t volt_scaled = (uint16_t)(this->battery_voltage_ * 100);
   bat_msg[0] = volt_scaled & 0xFF;
   bat_msg[1] = (volt_scaled >> 8) & 0xFF;
-  
-  int16_t curr_scaled = (int16_t)(this->battery_current_ * 100);
-  bat_msg[2] = curr_scaled & 0xFF;
-  bat_msg[3] = (curr_scaled >> 8) & 0xFF;
   bat_msg[4] = (uint8_t)this->battery_soc_;
   
   this->canbus_->send_data(0x621, true, bat_msg);
