@@ -8,9 +8,9 @@ AUTO_LOAD = ["canbus", "sensor"]
 
 ef_ps_ns = cg.esphome_ns.namespace("ef_ps")
 
-# FIX: Change CanbusListener to CanbusTrigger
+# FIX: Remove cg.Component from the list. CanbusTrigger handles it.
 CanbusTrigger = canbus.canbus_ns.class_("CanbusTrigger")
-EfPs = ef_ps_ns.class_("EfPs", cg.Component, CanbusTrigger)
+EfPs = ef_ps_ns.class_("EfPs", CanbusTrigger)
 CONF_CANBUS_ID = "canbus_id"
 
 CONFIG_SCHEMA = cv.Schema(
