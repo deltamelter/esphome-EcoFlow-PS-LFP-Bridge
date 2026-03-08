@@ -1,17 +1,21 @@
 #pragma once
 
 #include "esphome/core/component.h"
+#include "esphome/core/helpers.h"
 #include "esphome/components/canbus/canbus.h"
 #include "esphome/components/sensor/sensor.h"
 
 namespace esphome {
 namespace ef_ps {
 
-class EfPs : public Component, public canbus::CanbusTrigger {
+// Inherit only from CanbusTrigger to avoid ambiguity errors
+class EfPs : public canbus::CanbusTrigger {
  public:
   void setup() override;
-  void loop() override; // We use loop() to handle the heartbeat timing
+  void loop() override;
   void dump_config() override;
+  
+  // Signature for CanbusTrigger
   void on_frame(const canbus::CanFrame &frame) override;
 
   void set_canbus_id(canbus::Canbus *canbus) { this->canbus_ = canbus; }
